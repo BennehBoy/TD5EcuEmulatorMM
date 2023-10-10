@@ -23,7 +23,7 @@
 
 #define obdSerial Serial3
  
-#define _DEBUG_
+//#define _DEBUG_
 #define _LCD_
  
 
@@ -41,9 +41,9 @@
 
 #define OLED_MOSI   PA7
 #define OLED_CLK    PA5
-#define OLED_DC    PB15
+#define OLED_DC    PA15
 #define OLED_CS    PB5
-#define OLED_RESET PA8
+#define OLED_RESET PB3
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -91,6 +91,7 @@ byte dataStreamFuelling9[] = { 0x02, 0x21, 0x40, 0x63 };		// INJ_BALANCE
 byte dataStreamFuelling10[] = { 0x02, 0x21, 0x21, 0x44 };		// RPM_ERROR
 byte dataStreamFuelling11[] = { 0x02, 0x21, 0x37, 0x5A };		// EGR_MOD
 byte dataStreamFuelling12[] = { 0x02, 0x21, 0x38, 0x5B };		// ILT_MOD
+byte dataStreamFuelling14[] = { 0x02, 0x21, 0x1D, 0x40 };   // Fuelling
 //byte dataStreamFuelling13[] = { 0x02, 0x21, 0x38, 0x00 };		// TWG_MOD   0x38 no good: TODO find good one...
 byte faultCodes[] = { 0x02, 0x21, 0x3B, 0x5E };					// FAULT_CODES
 byte clearFaultCodes[] = { 0x14, 0x31, 0xDD, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22 };              // CLEAR_FAULTS
@@ -140,14 +141,13 @@ boolean iso_compare_data(byte *rcv, byte *cpm, byte len)
 
 void setup()  
 {
-  // Open serial communications and wait for port to open:
-  Serial.begin(57600);
-
   display1.begin(SSD1306_SWITCHCAPVCC); //construct our displays
   display1.clearDisplay();
   display1.display();   // clears the screen and buffer
 
 #ifdef _DEBUG_
+  // Open serial communications and wait for port to open:
+  Serial.begin(57600);
   Serial.println("Startup...");
 #endif
 #ifdef _LCD_
@@ -567,7 +567,33 @@ void loop()
     dataIndex = 0;
   }  
   
-  
+  /////////////////////////////////////////////////////////
+  //                       Fuelling 14    Fuelling       //
+  /////////////////////////////////////////////////////////
+  if (iso_compare_data(dataResponse, dataStreamFuelling14, 4))
+  {
+    // Send the message
+    byte dataStream[] = {0x14, 0x61, 0x1D, 0xFE, 0x0C, 0x75, 0x30, 0x11, 0x3E, 0x00, 0x00, 0x00, 0x00, 0x0F, 0x0A, 0x00, 0x00, 0x15, 0x7C, 0x00, 0x28, 0xF8};   // 39 MPH
+
+    for (byte i = 0; i < 22; i++)
+    {
+      iso_write_byte(dataStream[i]);
+    }
+#ifdef _DEBUG_        
+      for(int i=0; i<22; i++)
+        remote_log_byte(dataStream[i]);
+#endif    
+#ifdef _LCD_
+    scrollLcd("F14 - Fuelling request  ");
+#endif    
+    for (byte i = 0; i < dataIndex; i++)
+    {
+      dataResponse[i] = 0x00;
+    }
+
+    lastReceivedPidTime = millis();
+    dataIndex = 0;
+  }  
   
   /////////////////////////////////////////////////////////
   //                        Keep Alive                   //
