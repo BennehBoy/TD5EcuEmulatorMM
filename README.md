@@ -1,5 +1,5 @@
 # TD5 Ecu Emulator
-STM32 & SSD1306 based TD5 ECU Emulator - I2C LCD, Emulated K-line
+STM32 & SSD1306 based TD5 ECU Emulator - Emulated K-line over HW serial (10400 baud)
 
 You can use a Maple Mini/clone or Bluepill as a hardware target (or most STM32 microcontrollers but you may have to change pin assigments / serial device for the k-line)
 
