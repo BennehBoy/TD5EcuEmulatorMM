@@ -5,7 +5,7 @@ You can use a Maple Mini/clone or Bluepill as a hardware target (or most STM32 m
 
 Requires the official stm32 core -> https://github.com/stm32duino/Arduino_Core_STM32
 
-Updated to include Fuelling PID - sniffed from real ECU on bench (values output are zeros for no, until in car sniff can be completed)
+Updated to include Fuelling PID - sniffed from real ECU on bench (values output are zeros for now, until in car sniff can be completed)
 
 Pins for OLED changed in line with LRDuinoTD5 project.
 
